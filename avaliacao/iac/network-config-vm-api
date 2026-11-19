@@ -1,0 +1,12 @@
+version: 2
+ethernets:
+  nat:
+    match:
+      macaddress: "08:00:27:aa:bb:21"
+    dhcp4: true
+  hostonly:
+    match:
+      macaddress: "08:00:27:aa:bb:22"
+    addresses:
+      - 192.168.56.102/24
+    dhcp4: false

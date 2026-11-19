@@ -1,0 +1,61 @@
+
+---
+- name: Implantar aplicacao Web
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Criar diretorio da aplicacao
+      ansible.builtin.file:
+        path: /opt/produtos/app
+        state: directory
+
+    - name: Copiar arquivos do site
+      ansible.builtin.copy:
+        src: ../app/
+        dest: /opt/produtos/app/
+
+    - name: Construir imagem do site
+      ansible.builtin.command:
+        cmd: docker build -t cadastro-produtos-web .
+        chdir: /opt/produtos/app
+
+    - name: Remover container anterior
+      ansible.builtin.command:
+        cmd: docker rm -f cadastro-web
+      failed_when: false
+      changed_when: false
+
+    - name: Iniciar container Web
+      ansible.builtin.command:
+        cmd: docker run -d --restart unless-stopped --name cadastro-web -p 80:80 cadastro-produtos-web
+
+
+- name: Implantar API e banco de dados
+  hosts: api
+  become: true
+
+  tasks:
+    - name: Criar diretorio da API
+      ansible.builtin.file:
+        path: /opt/produtos/api
+        state: directory
+
+    - name: Copiar arquivos da API
+      ansible.builtin.copy:
+        src: ../api/
+        dest: /opt/produtos/api/
+
+    - name: Configurar variaveis de ambiente
+      ansible.builtin.copy:
+        dest: /opt/produtos/api/.env
+        mode: "0600"
+        content: |
+          MYSQL_ROOT_PASSWORD=MinhaSenhaRoot123
+          DB_PASSWORD=MinhaSenhaApp123
+          CORS_ORIGIN=http://192.168.56.101
+
+    - name: Iniciar API e MySQL
+      ansible.builtin.command:
+        cmd: docker compose --env-file .env -f docker-compose.yml up -d --build
+        chdir: /opt/produtos/api

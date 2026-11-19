@@ -1,0 +1,9 @@
+# Credenciais e variáveis de ambiente
+.env
+api/.env
+
+# Dependências Node.js
+node_modules/
+
+# Logs
+*.log

@@ -1,0 +1,25 @@
+
+#cloud-config
+
+hostname: vm-web
+manage_etc_hosts: true
+
+users:
+  - default
+  - name: aluno
+    groups: [adm, sudo]
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKQZn0abnIv9RoZmrs3/Pwa8rsQ7e4qqoIDIQ4xlTTF3 aluno@aluno-OptiPlex-SFF-Plus-7020
+
+package_update: true
+
+packages:
+  - openssh-server
+  - qemu-guest-agent
+
+runcmd:
+  - systemctl enable --now ssh
+  - systemctl enable --now qemu-guest-agent

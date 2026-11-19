@@ -1,0 +1,25 @@
+
+#cloud-config
+
+hostname: __HOSTNAME__
+manage_etc_hosts: true
+
+users:
+  - default
+  - name: aluno
+    groups: [adm, sudo]
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    lock_passwd: true
+    ssh_authorized_keys:
+      - __SSH_PUBLIC_KEY__
+
+package_update: true
+
+packages:
+  - openssh-server
+  - qemu-guest-agent
+
+runcmd:
+  - systemctl enable --now ssh
+  - systemctl enable --now qemu-guest-agent

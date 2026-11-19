@@ -1,0 +1,56 @@
+
+---
+- name: Preparar servidores com Docker
+  hosts: servidores
+  become: true
+
+  tasks:
+    - name: Instalar dependencias
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+
+    - name: Criar diretorio das chaves APT
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Adicionar chave GPG do Docker
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Adicionar repositorio oficial do Docker
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable"
+        filename: docker
+        state: present
+        update_cache: true
+
+    - name: Instalar Docker e Docker Compose
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Iniciar e habilitar Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Adicionar aluno ao grupo Docker
+      ansible.builtin.user:
+        name: aluno
+        groups: docker
+        append: true
